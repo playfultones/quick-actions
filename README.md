@@ -98,14 +98,13 @@ xcrun notarytool history --keychain-profile "$NotarizationKeychainProfileName"
 3. **Configure Workflow Settings**
    - "Workflow receives current": **files or folders**
    - "in": **Finder.app**
-   - Check: "Output replaces selected text" (optional)
 
 4. **Add Run Shell Script Action**
    - Search for "Run Shell Script" in the actions list
    - Drag it to the workflow area
 
 5. **Configure Shell Script**
-   - Shell: `/bin/bash`
+   - Shell: `/bin/bash`, or `/bin/zsh`
    - Pass input: **as arguments**
    - Paste this code:
    ```bash
