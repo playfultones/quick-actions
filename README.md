@@ -106,11 +106,11 @@ xcrun notarytool history --keychain-profile "$NotarizationKeychainProfileName"
 5. **Configure Shell Script**
    - Shell: `/bin/bash`, or `/bin/zsh`
    - Pass input: **as arguments**
-   - Paste this code:
+   - Paste this code (you can either reference the script path or paste the entire script content):
    ```bash
    /path/to/CreatePluginPackage.sh "$@"
    ```
-   - **Important:** Replace `/path/to/` with the actual location of your script
+   - **Important:** Replace `/path/to/` with the actual location of your script, or alternatively, paste the entire contents of `CreatePluginPackage.sh` directly into this field
 
 6. **Save the Quick Action**
    - File → Save (⌘S)
