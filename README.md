@@ -1,3 +1,223 @@
+A collection of useful macOS Quick Actions (Finder context menu shortcuts) for common development and media tasks.
+
+- [ConvertToWebP Quick Action](#converttowebp-quick-action)
+  - [What It Does](#what-it-does)
+  - [Output Files](#output-files)
+  - [Prerequisites](#prerequisites)
+    - [Install WebP Tools](#install-webp-tools)
+  - [Setting Up as a Quick Action](#setting-up-as-a-quick-action)
+    - [Method 1: Automator (Recommended)](#method-1-automator-recommended)
+    - [Method 2: Services Menu Folder](#method-2-services-menu-folder)
+  - [Using the Quick Action](#using-the-quick-action)
+    - [From Finder](#from-finder)
+    - [Supported Input Formats](#supported-input-formats)
+  - [Technical Details](#technical-details)
+    - [Conversion Quality](#conversion-quality)
+    - [Responsive Breakpoints](#responsive-breakpoints)
+    - [Using in HTML](#using-in-html)
+  - [Troubleshooting](#troubleshooting)
+    - [cwebp Not Found](#cwebp-not-found)
+    - [Quick Action Not Appearing](#quick-action-not-appearing)
+    - [Script Permission Denied](#script-permission-denied)
+    - [No Output Files Created](#no-output-files-created)
+- [CreatePluginPackage Quick Action](#createpluginpackage-quick-action)
+  - [Prerequisites](#prerequisites-1)
+    - [1. Apple Developer Account](#1-apple-developer-account)
+    - [2. Developer Certificate](#2-developer-certificate)
+    - [3. App-Specific Password](#3-app-specific-password)
+    - [4. Store Notarization Credentials](#4-store-notarization-credentials)
+    - [5. Configure Environment Variables](#5-configure-environment-variables)
+    - [6. Verify Setup](#6-verify-setup)
+  - [Setting Up as a Quick Action](#setting-up-as-a-quick-action-1)
+    - [Method 1: Automator (Recommended)](#method-1-automator-recommended-1)
+    - [Method 2: Services Menu Folder](#method-2-services-menu-folder-1)
+  - [Using the Quick Action](#using-the-quick-action-1)
+    - [From Finder](#from-finder-1)
+  - [What the Script Does](#what-the-script-does)
+    - [Bundle Processing](#bundle-processing)
+    - [DMG Creation (Optional)](#dmg-creation-optional)
+  - [Supported Plugin Formats](#supported-plugin-formats)
+  - [Troubleshooting](#troubleshooting-1)
+    - [Environment Variables Not Found](#environment-variables-not-found)
+    - [Certificate Not Found](#certificate-not-found)
+    - [Notarization Fails](#notarization-fails)
+    - [Quick Action Not Appearing](#quick-action-not-appearing-1)
+    - [Script Permission Denied](#script-permission-denied-1)
+  - [Advanced Configuration](#advanced-configuration)
+    - [Custom Profile Names](#custom-profile-names)
+    - [Multiple Certificates](#multiple-certificates)
+    - [Debug Mode](#debug-mode)
+  - [Security Notes](#security-notes)
+  - [Resources](#resources)
+  - [License](#license)
+
+
+---
+
+# ConvertToWebP Quick Action
+
+A macOS Quick Action that converts images (PNG, JPG, JPEG, GIF) to modern WebP format with automatic responsive image generation.
+
+## What It Does
+
+- **Converts images to WebP** - Takes any image format and creates an optimized WebP version
+- **Generates responsive sizes** - Automatically creates 400w, 800w, and 1200w versions for responsive web design
+- **Smart sizing** - Only generates smaller versions if the original image is larger
+- **Batch processing** - Convert multiple images at once by selecting them in Finder
+
+## Output Files
+
+For an input file `photo.jpg` (1600px wide), the script creates:
+```
+photo.webp           # Full-size WebP (1600px)
+photo-400w.webp      # 400px wide version
+photo-800w.webp      # 800px wide version
+photo-1200w.webp     # 1200px wide version
+```
+
+All files are created in the same directory as the original image.
+
+## Prerequisites
+
+### Install WebP Tools
+
+Install the WebP command-line tools using Homebrew:
+
+```bash
+brew install webp
+```
+
+This installs `cwebp`, which the script uses for conversion.
+
+## Setting Up as a Quick Action
+
+### Method 1: Automator (Recommended)
+
+1. **Open Automator**
+   - Applications → Automator
+   - Click "New Document"
+
+2. **Create Quick Action**
+   - Select "Quick Action" (or "Service" on older macOS versions)
+   - Click "Choose"
+
+3. **Configure Workflow Settings**
+   - "Workflow receives current": **image files**
+   - "in": **Finder.app**
+
+4. **Add Run Shell Script Action**
+   - Search for "Run Shell Script" in the actions list
+   - Drag it to the workflow area
+
+5. **Configure Shell Script**
+   - Shell: `/bin/bash`
+   - Pass input: **as arguments**
+   - Paste this code:
+   ```bash
+   /path/to/ConvertToWebP.sh "$@"
+   ```
+   - **Important:** Replace `/path/to/` with the actual location of your script, or paste the entire contents of `ConvertToWebP.sh` directly into this field
+
+6. **Save the Quick Action**
+   - File → Save (⌘S)
+   - Name: "Convert to WebP"
+   - Location: `~/Library/Services/` (default)
+
+### Method 2: Services Menu Folder
+
+Alternatively, place the Quick Action directly:
+
+1. Navigate to: `~/Library/Services/`
+2. Place your `.workflow` bundle there
+3. It will appear in the Services menu
+
+## Using the Quick Action
+
+### From Finder
+
+1. **Select Images**
+   - Select one or more image files in Finder (`.jpg`, `.png`, `.gif`, etc.)
+   - Right-click (or Control+click)
+
+2. **Run Quick Action**
+   - Navigate to: Quick Actions → Convert to WebP
+   - The script runs silently in the background
+
+3. **Check Results**
+   - WebP files appear in the same folder as your original images
+
+### Supported Input Formats
+
+- **JPEG/JPG** - `.jpg`, `.jpeg`
+- **PNG** - `.png`
+- **GIF** - `.gif`
+- **WebP** - `.webp` (generates responsive versions from existing WebP)
+
+## Technical Details
+
+### Conversion Quality
+
+- **Full-size WebP**: Quality 90 (high quality, good compression)
+- **Responsive versions**: Quality 85 (balanced for web delivery)
+
+### Responsive Breakpoints
+
+- **400w** - Mobile phones
+- **800w** - Tablets and small laptops
+- **1200w** - Desktop displays
+
+The script only creates smaller versions if the original image is larger than the target width.
+
+### Using in HTML
+
+Example responsive image markup:
+
+```html
+<picture>
+  <source
+    srcset="photo-400w.webp 400w,
+            photo-800w.webp 800w,
+            photo-1200w.webp 1200w,
+            photo.webp 1600w"
+    type="image/webp">
+  <img src="photo.jpg" alt="Description">
+</picture>
+```
+
+## Troubleshooting
+
+### cwebp Not Found
+
+**Error**: "cwebp not found. Install with: brew install webp"
+
+**Solution**:
+```bash
+brew install webp
+```
+
+### Quick Action Not Appearing
+
+**Solution**:
+- Check: System Preferences → Extensions → Finder
+- Ensure your Quick Action is enabled
+- Restart Finder: Option+Right-click Finder icon → Relaunch
+
+### Script Permission Denied
+
+**Solution**:
+```bash
+chmod +x /path/to/ConvertToWebP.sh
+```
+
+### No Output Files Created
+
+**Solution**:
+- Check that input files are valid images
+- Verify cwebp is installed: `which cwebp`
+- Try running the script manually: `/path/to/ConvertToWebP.sh /path/to/image.jpg`
+
+---
+
 # CreatePluginPackage Quick Action
 
 A macOS Quick Action for code signing and notarizing audio plugins (VST3, AudioUnit, Standalone Apps) with Apple Developer credentials.
